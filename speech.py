@@ -1,6 +1,6 @@
 import os
 import time
-
+from multiprocessing import Process
 from board import SCL, SDA
 import busio
 from PIL import Image, ImageDraw, ImageFont
@@ -51,7 +51,8 @@ while True:
     break
 #=====================display init_end
 def situation():
-     os.system("arecord --duration=4 ~/record/filename.wav")
+    while True:
+        os.system("arecord --duration=4 ~/record/filename.wav &")
 #=====================google_speech
 # Audio recording parameters
 #RATE =44100 
@@ -60,9 +61,7 @@ CHUNK =int(RATE /10)  # 100ms
 
 #print stt 20*5 character
 def listen_print_loop(responses): 
-
     for response in responses:
-        situation()
         result = response.results[0]
         transcript = result.alternatives[0].transcript
         str_1 = str(transcript)
@@ -106,5 +105,6 @@ with MicrophoneStream(RATE, CHUNK) as stream:
 	requests = (speech.StreamingRecognizeRequest(audio_content =content)
 				for content in audio_generator)
 	responses = client.streaming_recognize(streaming_config, requests)
-	
-	listen_print_loop(responses)
+p1 = Process(target=situation) #situation around
+p2 = Process(target=listen_print_loop, args=responses) #stt
+	#listen_print_loop(responses)
